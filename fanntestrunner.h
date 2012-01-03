@@ -25,10 +25,10 @@ using namespace std;
 #define TIME_FRAME          150
 #define OFFSET              50
 
-#define CAPTURE_FILE_NAME   "/home/martijn/school/a_han/project/figmento/tags/eeg/1_30_Raw Data.wsv"
-#define MARKER_FILE_NAME    "/home/martijn/school/a_han/project/figmento/tags/eeg/1_30.vmrk"
-#define TRAIN_FILE_NAME     "/home/martijn/school/a_han/project/figmento/tags/eeg/train.data"
-#define NN_FILE_NAME        "/home/martijn/school/a_han/project/figmento/tags/eeg/nn.net"
+#define CAPTURE_FILE_NAME   "data/1_30_Raw Data.wsv"
+#define MARKER_FILE_NAME    "data/1_30.vmrk"
+#define TRAIN_FILE_NAME     "data/train.data"
+#define NN_FILE_NAME        "data/nn.net"
 
 #define DEBUG   true
 #define debug   if (DEBUG) qDebug() <<
