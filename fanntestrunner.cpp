@@ -3,22 +3,7 @@
 QString stimulusTypes[STIMULUS_COUNT] = {"S  2", "S  3", "S  4"};
 //QString stimulusTypes[STIMULUS_COUNT] = {"S  2", "S  5", "S  6"};
 
-FannTestRunner::FannTestRunner() {
-    this->epochTime = QTime::currentTime();
-
-    this->rawCapture = new RawEegCapture(CAPTURE_FILE_NAME);
-    debug "Loaded raw capture file " << CAPTURE_FILE_NAME;
-
-    this->rawCapture->selectColumn(CHANNEL);
-    debug "Selected channel " << CHANNEL;
-
-    this->markerFile = new EegMarkerFile(MARKER_FILE_NAME);
-    debug "Loaded marker file " << MARKER_FILE_NAME;
-
-    this->markers = markerFile->markers(MARKER_TYPE);
-    this->markerCount = this->markers.size();
-    debug "Extracted " << this->markerCount << " markers";
-}
+FannTestRunner::FannTestRunner() {}
 
 unsigned FannTestRunner::encodeStimulusType(QString description) {
     for (int i = 0; i < STIMULUS_COUNT; i++) {
@@ -108,6 +93,19 @@ int FannTestRunner::create() {
 }
 
 int FannTestRunner::train() {
+    this->rawCapture = new RawEegCapture(CAPTURE_FILE_NAME);
+    debug "Loaded raw capture file " << CAPTURE_FILE_NAME;
+
+    this->rawCapture->selectColumn(CHANNEL);
+    debug "Selected channel " << CHANNEL;
+
+    this->markerFile = new EegMarkerFile(MARKER_FILE_NAME);
+    debug "Loaded marker file " << MARKER_FILE_NAME;
+
+    this->markers = markerFile->markers(MARKER_TYPE);
+    this->markerCount = this->markers.size();
+    debug "Extracted " << this->markerCount << " markers";
+
     const unsigned int num_input = TIME_FRAME / SAMPLING_INTERVAL;
     const unsigned int num_output = STIMULUS_COUNT;
     const unsigned int num_layers = 4;
