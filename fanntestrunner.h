@@ -48,8 +48,6 @@ private:
     EegMarkerFile* markerFile;
     QVector<Marker> markers;
     unsigned markerCount;
-    int seed;
-    QTime epochTime;
 
     void createSimpleFann();
     unsigned encodeStimulusType(QString description);
