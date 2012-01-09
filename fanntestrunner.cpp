@@ -38,6 +38,19 @@ QString FannTestRunner::decodeStimulusType(fann_type *output) {
 }
 
 int FannTestRunner::create() {
+    this->rawCapture = new RawEegCapture(CAPTURE_FILE_NAME);
+    debug "Loaded raw capture file " << CAPTURE_FILE_NAME;
+
+    this->rawCapture->selectColumn(CHANNEL);
+    debug "Selected channel " << CHANNEL;
+
+    this->markerFile = new EegMarkerFile(MARKER_FILE_NAME);
+    debug "Loaded marker file " << MARKER_FILE_NAME;
+
+    this->markers = markerFile->markers(MARKER_TYPE);
+    this->markerCount = this->markers.size();
+    debug "Extracted " << this->markerCount << " markers";
+
     QFile* file = new QFile(TRAIN_FILE_NAME);
     file->open(QFile::WriteOnly);
     QTextStream stream(file);
@@ -93,19 +106,6 @@ int FannTestRunner::create() {
 }
 
 int FannTestRunner::train() {
-    this->rawCapture = new RawEegCapture(CAPTURE_FILE_NAME);
-    debug "Loaded raw capture file " << CAPTURE_FILE_NAME;
-
-    this->rawCapture->selectColumn(CHANNEL);
-    debug "Selected channel " << CHANNEL;
-
-    this->markerFile = new EegMarkerFile(MARKER_FILE_NAME);
-    debug "Loaded marker file " << MARKER_FILE_NAME;
-
-    this->markers = markerFile->markers(MARKER_TYPE);
-    this->markerCount = this->markers.size();
-    debug "Extracted " << this->markerCount << " markers";
-
     const unsigned int num_input = TIME_FRAME / SAMPLING_INTERVAL;
     const unsigned int num_output = STIMULUS_COUNT;
     const unsigned int num_layers = 4;
