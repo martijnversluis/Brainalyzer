@@ -20,6 +20,10 @@ int main(int argc, char *argv[]) {
         return testRunner.run();
     }
 
+    if (command == "mse") {
+        return testRunner.mse();
+    }
+
     cout << "usage: qt_fann create Create a new training file\n";
     cout << "               train  Train the NN on the generated training file\n";
     cout << "               run    Run the trained NN\n";

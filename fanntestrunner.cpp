@@ -20,11 +20,6 @@ FannTestRunner::FannTestRunner() {
     debug "Extracted " << this->markerCount << " markers";
 }
 
-void FannTestRunner::initializeFann() {
-    fann_set_activation_function_hidden(this->ann, FANN_SIGMOID_SYMMETRIC);
-    fann_set_activation_function_output(this->ann, FANN_SIGMOID_SYMMETRIC);
-}
-
 unsigned FannTestRunner::encodeStimulusType(QString description) {
     for (int i = 0; i < STIMULUS_COUNT; i++) {
         if (description == stimulusTypes[i]) {
@@ -115,58 +110,52 @@ int FannTestRunner::create() {
 int FannTestRunner::train() {
     const unsigned int num_input = TIME_FRAME / SAMPLING_INTERVAL;
     const unsigned int num_output = STIMULUS_COUNT;
-    const unsigned int num_layers = 3;
-    const unsigned int num_neurons_hidden = 3;
-    const float desired_error = (const float) 0.001;
-    const unsigned int max_epochs = 500000;
+    const unsigned int num_layers = 4;
+    //const unsigned int num_neurons_hidden = 10;
+    const float desired_error = (const float) 0.0001;
+    const unsigned int max_epochs = 10000;
     const unsigned int epochs_between_reports = 1000;
 
-    this->ann = fann_create_standard(num_layers, num_input, num_neurons_hidden, num_output);
-    this->initializeFann();
+    this->ann = fann_create_standard(num_layers, num_input, 25, 10, num_output);
+
+    fann_set_learning_rate(this->ann, 0.5);
+    fann_set_training_algorithm(this->ann, FANN_TRAIN_QUICKPROP);
+
     fann_set_activation_function_hidden(this->ann, FANN_SIGMOID_SYMMETRIC);
     fann_set_activation_function_output(this->ann, FANN_SIGMOID_SYMMETRIC);
+
     fann_train_on_file(this->ann, TRAIN_FILE_NAME, max_epochs, epochs_between_reports, desired_error);
     fann_save(this->ann, NN_FILE_NAME);
 
     return EXIT_SUCCESS;
 }
 
+int FannTestRunner::mse() {
+    this->ann = fann_create_from_file(NN_FILE_NAME);
+    struct fann_train_data *data =
+        fann_read_train_from_file(TRAIN_FILE_NAME);
+
+    cout << "Current MSE: " << fann_test_data(this->ann, data) << endl;
+    return EXIT_SUCCESS;
+}
+
 int FannTestRunner::run() {
     this->ann = fann_create_from_file(NN_FILE_NAME);
-    this->initializeFann();
 
-    unsigned num_input = TIME_FRAME / SAMPLING_INTERVAL;
+    struct fann_train_data *capture =
+        fann_read_train_from_file(TRAIN_FILE_NAME);
+
     unsigned success = 0;
     unsigned total = 0;
 
-    cout << "Now testing the NN: ";
-    unsigned offsetInLines = OFFSET / SAMPLING_INTERVAL;
-    ProgressIndicator indicator(this->markerCount);
+    for (unsigned i = 0; i < capture->num_data; i++) {
+        fann_type* output =
+            fann_run(this->ann, capture->input[i]);
 
-    for (unsigned i = 0; i < this->markerCount; i++) {
-        Marker marker = markers[i];
-        this->rawCapture->gotoLine(marker.position + offsetInLines);
-
-        fann_type* output;
-        fann_type input[num_input];
-
-        for (unsigned index = 0; index < num_input; index++) {
-            input[index] = this->rawCapture->read();
-        }
-
-        output = fann_run(this->ann, input);
         total++;
-
-        QString type = decodeStimulusType(output);
-        //qDebug() << output[0] << " " << output[1] << " " << output[2];
-        //qDebug() << "Determined type to be " << type << ", was " << marker.description;
-
-        if (type == marker.description) {
+        if (decodeStimulusType(output) == decodeStimulusType(capture->output[i])) {
             success++;
         }
-
-        //sleep(1);
-        indicator.setValue(i + 1);
     }
 
     cout << "\n" << total << " tested, " << success << " passed => " << (int)((success * 100) / total) << "%\n";

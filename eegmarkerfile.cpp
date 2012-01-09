@@ -3,7 +3,8 @@
 EegMarkerFile::EegMarkerFile(QString filename):
     TextDataFile(filename)
 {
-    while (!this->readLine().contains("[Marker Infos]"));
+    while (!this->readLine().contains("[Marker Infos]"))
+        continue;
 }
 
 QVector<Marker> EegMarkerFile::markers(QString typeFilter = "") {

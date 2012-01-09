@@ -8,7 +8,8 @@
 
 #include <iostream>
 #include <iomanip>
-#include "doublefann.h"
+#include <doublefann.h>
+
 #include "raweegcapture.h"
 #include "eegmarkerfile.h"
 #include "raweegcapture.h"
@@ -40,6 +41,7 @@ public:
     int create();
     int train();
     int run();
+    int mse();
 
 private:
     struct fann* ann;
@@ -51,7 +53,6 @@ private:
     QTime epochTime;
 
     void createSimpleFann();
-    void initializeFann();
     unsigned encodeStimulusType(QString description);
     QString decodeStimulusType(fann_type* output);
 

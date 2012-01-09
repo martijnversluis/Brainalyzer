@@ -14,9 +14,11 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-unix|win32: LIBS += -lfann
+INCLUDEPATH += -I/usr/local/include
 
-unix|win32: LIBS += -ldoublefann
+LIBS += -L/usr/local/lib
+LIBS += -lfann
+LIBS += -lm
 
 
 SOURCES += main.cpp \
