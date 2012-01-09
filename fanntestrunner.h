@@ -17,7 +17,6 @@
 using namespace std;
 
 #define STIMULUS_COUNT      3
-#define DIRECTORY           "/home/martijn/school/a_han/project/figmento/tags/eeg/"
 #define CHANNEL             "FC1"
 #define MARKER_TYPE         "Stimulus"
 #define NUM_SESSIONS        1
