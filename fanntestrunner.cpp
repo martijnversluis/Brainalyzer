@@ -23,6 +23,10 @@ QString FannTestRunner::decodeStimulusType(fann_type *output) {
     for (int i = 0; i < STIMULUS_COUNT; i++) {
         double value = output[i];
 
+        if (value == max) {
+            return NULL;
+        }
+
         if (value > max || i == 0) {
             max = value;
             type = i;
@@ -33,8 +37,7 @@ QString FannTestRunner::decodeStimulusType(fann_type *output) {
         return stimulusTypes[type];
     }
 
-    debug "Unknown stimulus code";
-    return "";
+    return NULL;
 }
 
 int FannTestRunner::create(QString channel) {
@@ -131,21 +134,28 @@ int FannTestRunner::mse() {
 
 int FannTestRunner::run() {
     this->ann = fann_create_from_file(NN_FILE_NAME);
-
-    struct fann_train_data *capture =
-        fann_read_train_from_file(TRAIN_FILE_NAME);
+    struct fann_train_data *capture = fann_read_train_from_file(TRAIN_FILE_NAME);
 
     unsigned success = 0;
     unsigned total = 0;
 
     for (unsigned i = 0; i < capture->num_data; i++) {
-        fann_type* output =
-            fann_run(this->ann, capture->input[i]);
+        fann_type* output = fann_run(this->ann, capture->input[i]);
+        QString type = decodeStimulusType(output);
+        debug "Type {" << output[0] << ", " << output[1] << "," << output[2] << "} decoded to " << type;
 
-        total++;
-        if (decodeStimulusType(output) == decodeStimulusType(capture->output[i])) {
-            success++;
+        if (type == NULL) {
+            debug "Type was null, not counting";
+        } else {
+            debug "[" << total << "] :" << type;
+
+            total++;
+            if (type == decodeStimulusType(capture->output[i])) {
+                success++;
+            }
         }
+
+        debug "-------------------------------------------";
     }
 
     cout << "\n" << total << " tested, " << success << " passed => " << (int)((success * 100) / total) << "%\n";
