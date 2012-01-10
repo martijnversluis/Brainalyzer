@@ -9,11 +9,13 @@ int main(int argc, char *argv[]) {
     FannTestRunner testRunner;
 
     if (command == "create") {
-        return testRunner.create();
+        QString channel = (argc >= 3) ? QString(argv[2]) : NULL;
+        return testRunner.create(channel);
     }
 
     if (command == "train") {
-        return testRunner.train();
+        double desiredError = (argc >= 3) ? QString(argv[2]).toFloat() : 0;
+        return testRunner.train(desiredError);
     }
 
     if (command == "run") {
@@ -24,9 +26,9 @@ int main(int argc, char *argv[]) {
         return testRunner.mse();
     }
 
-    cout << "usage: qt_fann create Create a new training file\n";
-    cout << "               train  Train the NN on the generated training file\n";
-    cout << "               run    Run the trained NN\n";
+    cout << "usage: qt_fann create [<channel>]      Create a new training file\n";
+    cout << "               train [<desired error>] Train the NN on the generated training file\n";
+    cout << "               run                     Run the trained NN\n";
 
     return EXIT_SUCCESS;
 }

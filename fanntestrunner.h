@@ -37,17 +37,13 @@ class FannTestRunner {
 
 public:
     FannTestRunner();
-    int create();
-    int train();
+    int create(QString channel);
+    int train(float desiredError);
     int run();
     int mse();
 
 private:
     struct fann* ann;
-    RawEegCapture* rawCapture;
-    EegMarkerFile* markerFile;
-    QVector<Marker> markers;
-    unsigned markerCount;
 
     void createSimpleFann();
     unsigned encodeStimulusType(QString description);
