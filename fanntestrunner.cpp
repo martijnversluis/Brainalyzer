@@ -37,30 +37,28 @@ QString FannTestRunner::decodeStimulusType(fann_type *output) {
     return "";
 }
 
-int FannTestRunner::create() {
-    this->rawCapture = new RawEegCapture(CAPTURE_FILE_NAME);
-    debug "Loaded raw capture file " << CAPTURE_FILE_NAME;
+int FannTestRunner::create(QString channel) {
+    if (channel.length() == 0) {
+        channel = CHANNEL;
+    }
 
-    this->rawCapture->selectColumn(CHANNEL);
-    debug "Selected channel " << CHANNEL;
+    unsigned num_input = TIME_FRAME / SAMPLING_INTERVAL;
+    unsigned num_output = STIMULUS_COUNT;
 
-    this->markerFile = new EegMarkerFile(MARKER_FILE_NAME);
-    debug "Loaded marker file " << MARKER_FILE_NAME;
+    RawEegCapture* rawCapture = new RawEegCapture(CAPTURE_FILE_NAME);
+    rawCapture->selectColumn(channel);
+    debug "Loaded capture " << CAPTURE_FILE_NAME << " [CHANNEL: " << CHANNEL << "]";
 
-    this->markers = markerFile->markers(MARKER_TYPE);
-    this->markerCount = this->markers.size();
-    debug "Extracted " << this->markerCount << " markers";
+    EegMarkerFile* markerFile = new EegMarkerFile(MARKER_FILE_NAME);
+    QVector<Marker> markers = markerFile->markers(MARKER_TYPE);
+    unsigned num_markers = markers.size();
+    debug "Loaded " << num_markers << " \"" << MARKER_TYPE << "\" markers from " << MARKER_FILE_NAME;
 
     QFile* file = new QFile(TRAIN_FILE_NAME);
     file->open(QFile::WriteOnly);
     QTextStream stream(file);
+    cout << "Writing to training data file " << TRAIN_FILE_NAME << ": ";
 
-    unsigned num_input = TIME_FRAME / SAMPLING_INTERVAL;
-    unsigned num_output = STIMULUS_COUNT;
-    unsigned num_markers = this->markerCount;
-
-    cout << "Writing to training data file: ";
-    cout.flush();
     stream << num_markers << " " << num_input << " " << num_output << "\n";
 
     unsigned offsetInLines = OFFSET / SAMPLING_INTERVAL;
@@ -68,34 +66,24 @@ int FannTestRunner::create() {
 
     for (unsigned m = 0; m < num_markers; m++) {
         Marker marker = markers[m];
-        this->rawCapture->gotoLine(marker.position + offsetInLines);
+        rawCapture->gotoLine(marker.position + offsetInLines);
 
-        unsigned index = 0;
-        bool first = true;
-
-        while (index++ < num_input) {
-            if (first) {
-                first = false;
-            } else {
-                stream << " ";
-            }
-
-            stream << this->rawCapture->read();
+        for (unsigned i = 0; i < num_input; i++) {
+            if (i > 0) stream << " ";
+            stream << rawCapture->read();
         }
 
         stream << "\n";
 
         unsigned stimulusType = encodeStimulusType(marker.description);
-        for (unsigned i = 0; i < num_output; i++) {
-            if (i > 0) {
-                stream << " ";
-            }
 
+        for (unsigned i = 0; i < num_output; i++) {
+            if (i > 0) stream << " ";
             stream << ((i == stimulusType) ? 1 : 0);
         }
 
-        indicator.setValue(m + 1);
         stream << "\n";
+        indicator.setValue(m + 1);
     }
 
     stream << "\n";
