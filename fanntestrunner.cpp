@@ -17,8 +17,8 @@ unsigned FannTestRunner::encodeStimulusType(QString description) {
 }
 
 QString FannTestRunner::decodeStimulusType(fann_type *output) {
-    int type;
-    double max;
+    int type = 0;
+    double max = 0;
 
     for (int i = 0; i < STIMULUS_COUNT; i++) {
         double value = output[i];
