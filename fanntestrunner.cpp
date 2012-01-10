@@ -93,19 +93,20 @@ int FannTestRunner::create(QString channel) {
     return EXIT_SUCCESS;
 }
 
-int FannTestRunner::train() {
-    const unsigned int num_input = TIME_FRAME / SAMPLING_INTERVAL;
-    const unsigned int num_output = STIMULUS_COUNT;
-    const unsigned int num_layers = 4;
-    //const unsigned int num_neurons_hidden = 10;
-    const float desired_error = (const float) 0.0001;
-    const unsigned int max_epochs = 10000;
-    const unsigned int epochs_between_reports = 1000;
+int FannTestRunner::train(float desiredError) {
+    if (desiredError == 0.0) {
+        desiredError = 0.0001;
+    }
 
-    this->ann = fann_create_standard(num_layers, num_input, 25, 10, num_output);
-    struct fann_train_data *data =
-        fann_read_train_from_file(TRAIN_FILE_NAME);
-    fann_set_input_scaling_params(this->ann, data, -1.0f, 1.0f);
+    const unsigned int numInput = TIME_FRAME / SAMPLING_INTERVAL;
+    const unsigned int numOutput = STIMULUS_COUNT;
+    const unsigned int numLayers = 4;
+    const unsigned int maxEpochs = 10000;
+    const unsigned int epochsBetweenReports = 1000;
+
+    this->ann = fann_create_standard(numLayers, numInput, 25, 10, numOutput);
+    struct fann_train_data *data = fann_read_train_from_file(TRAIN_FILE_NAME);
+    fann_set_input_scaling_params(this->ann, data, 0.0f, 1.0f);
 
     fann_set_learning_rate(this->ann, 0.5);
     fann_set_training_algorithm(this->ann, FANN_TRAIN_QUICKPROP);
@@ -113,7 +114,7 @@ int FannTestRunner::train() {
     fann_set_activation_function_hidden(this->ann, FANN_SIGMOID_SYMMETRIC);
     fann_set_activation_function_output(this->ann, FANN_SIGMOID_SYMMETRIC);
 
-    fann_train_on_data(this->ann, data, max_epochs, epochs_between_reports, desired_error);
+    fann_train_on_data(this->ann, data, maxEpochs, epochsBetweenReports, desiredError);
     fann_save(this->ann, NN_FILE_NAME);
 
     return EXIT_SUCCESS;
