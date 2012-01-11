@@ -22,8 +22,8 @@ using namespace std;
 #define MARKER_TYPE         "Stimulus"
 #define NUM_SESSIONS        1
 #define SAMPLING_INTERVAL   2
-#define TIME_FRAME          150
-#define OFFSET              50
+#define TIME_FRAME          350
+#define OFFSET              150
 
 #define CAPTURE_FILE_NAME   "data/1_30_Raw Data.wsv"
 #define MARKER_FILE_NAME    "data/1_30.vmrk"
