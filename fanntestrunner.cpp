@@ -142,20 +142,14 @@ int FannTestRunner::run() {
     for (unsigned i = 0; i < capture->num_data; i++) {
         fann_type* output = fann_run(this->ann, capture->input[i]);
         QString type = decodeStimulusType(output);
-        debug "Type {" << output[0] << ", " << output[1] << "," << output[2] << "} decoded to " << type;
 
-        if (type == NULL) {
-            debug "Type was null, not counting";
-        } else {
-            debug "[" << total << "] :" << type;
-
+        if (type != NULL) {
             total++;
+
             if (type == decodeStimulusType(capture->output[i])) {
                 success++;
             }
         }
-
-        debug "-------------------------------------------";
     }
 
     cout << "\n" << total << " tested, " << success << " passed => " << (int)((success * 100) / total) << "%\n";
